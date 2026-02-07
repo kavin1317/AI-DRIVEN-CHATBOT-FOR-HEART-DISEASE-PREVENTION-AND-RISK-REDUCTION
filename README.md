@@ -37,29 +37,36 @@ SALKS achieved 87.02% accuracy, outperforming:
 - XRSS (XGBoost Random Classifier with Stratified K-Fold SMOTE): 81.30%
 - KNN: 77.05%
 
-## Repository Contents
-- Notebooks (in `Notebooks/`):
-  - `Proj_2_CB.ipynb`
-  - `Proj_2_SALKS.ipynb`
-  - `Proj_2_XGB_RC.ipynb`
-  - `proj_2_ANN.ipynb`
-  - `proj_2_KNN.ipynb`
-- Python scripts:
-  - `proj_2_ann.py`
-  - `proj_2_knn.py`
-  - `proj_2_own.py`
-  - `proj_2_xgb_rc.py`
+## Notebooks
+- `Notebooks/Proj_2_CB.ipynb`
+- `Notebooks/Proj_2_SALKS.ipynb`
+- `Notebooks/Proj_2_XGB_RC.ipynb`
+- `Notebooks/proj_2_ANN.ipynb`
+- `Notebooks/proj_2_KNN.ipynb`
+
+## Python Scripts
+- `proj_2_ann.py`
+- `proj_2_knn.py`
+- `proj_2_own.py`
+- `proj_2_xgb_rc.py`
+
+## Other Files
 - Dataset: `data/heart.csv`
 - Report: `reports/Kavin Proj Report Final.pdf`
+- Streamlit UI: `streamlit_app.py`
 
-## How to Run
-### Option 1: Notebooks (recommended)
+## Streamlit UI
+Run the web interface locally:
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+## How to Run Notebooks
 1. Open a notebook in Jupyter or Google Colab.
 2. Make sure `data/heart.csv` is available (adjust paths if needed).
 3. Run the cells top to bottom.
-
-### Option 2: Python scripts
-The `.py` files are exported from Colab and include notebook-style commands (for example `! pip install`). For best results, run them in Google Colab, or clean them for local execution.
 
 ## Report Source
 This README is derived from the project report: `reports/Kavin Proj Report Final.pdf`.
