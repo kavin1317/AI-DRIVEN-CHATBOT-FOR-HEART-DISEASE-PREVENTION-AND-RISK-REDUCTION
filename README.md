@@ -21,7 +21,7 @@ The report states the dataset was sourced from public medical repositories, prim
 - Max heart rate (thalach), exercise-induced angina (exang)
 - ST depression (oldpeak), slope, ca, thal
 
-The repository includes `heart.csv` for experiments.
+The repository includes `data/heart.csv` for experiments.
 
 ## Methods
 - Data cleaning and duplicate removal
@@ -38,18 +38,28 @@ SALKS achieved 87.02% accuracy, outperforming:
 - KNN: 77.05%
 
 ## Repository Contents
-- Notebooks: `proj_2_ANN.ipynb`, `proj_2_KNN.ipynb`, `Proj_2_XGB_RC.ipynb`, `Proj_2_CB.ipynb`
-- Python scripts: `proj_2_ann.py`, `proj_2_knn.py`, `proj_2_own.py`, `proj_2_xgb_rc.py`
-- Dataset: `heart.csv`
+- Notebooks (in `Notebooks/`):
+  - `Proj_2_CB.ipynb`
+  - `Proj_2_Own.ipynb`
+  - `Proj_2_XGB_RC.ipynb`
+  - `proj_2_ANN.ipynb`
+  - `proj_2_KNN.ipynb`
+- Python scripts:
+  - `proj_2_ann.py`
+  - `proj_2_knn.py`
+  - `proj_2_own.py`
+  - `proj_2_xgb_rc.py`
+- Dataset: `data/heart.csv`
+- Report: `reports/Kavin Proj Report Final.pdf`
 
 ## How to Run
 ### Option 1: Notebooks (recommended)
 1. Open a notebook in Jupyter or Google Colab.
-2. Make sure `heart.csv` is in the same directory.
+2. Make sure `data/heart.csv` is available (adjust paths if needed).
 3. Run the cells top to bottom.
 
 ### Option 2: Python scripts
 The `.py` files are exported from Colab and include notebook-style commands (for example `! pip install`). For best results, run them in Google Colab, or clean them for local execution.
 
 ## Report Source
-This README is derived from the project report: `Kavin Proj Report Final.pdf`.
+This README is derived from the project report: `reports/Kavin Proj Report Final.pdf`.
