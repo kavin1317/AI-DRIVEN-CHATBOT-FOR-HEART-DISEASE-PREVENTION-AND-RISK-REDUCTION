@@ -40,7 +40,7 @@ SALKS achieved 87.02% accuracy, outperforming:
 ## Repository Contents
 - Notebooks (in `Notebooks/`):
   - `Proj_2_CB.ipynb`
-  - `Proj_2_Own.ipynb`
+  - `Proj_2_SALKS.ipynb`
   - `Proj_2_XGB_RC.ipynb`
   - `proj_2_ANN.ipynb`
   - `proj_2_KNN.ipynb`
