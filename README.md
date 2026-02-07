@@ -1,0 +1,55 @@
+# AI-Driven Chatbot for Heart Disease Prevention and Risk Reduction
+
+## Overview
+Cardiovascular diseases (CVDs) remain a leading cause of mortality worldwide. This project proposes an AI-powered chatbot that assesses heart disease risk and provides personalized recommendations on exercise, diet, and stress management. The approach combines data analytics and machine learning to make risk assessment more accessible and interactive.
+
+## Key Idea (SALKS)
+The proposed model, SALKS, integrates:
+- Stratified k-fold cross validation for robust evaluation
+- Artificial Neural Networks (ANNs) for non-linear feature learning
+- Logistic Regression for explainability and meta-learning
+- K-Nearest Neighbors (KNN) for proximity-based classification
+- SMOTE to handle class imbalance
+
+This ensemble is designed to improve predictive performance over traditional single models.
+
+## Dataset
+The report states the dataset was sourced from public medical repositories, primarily the UCI Heart Disease dataset and Kaggle medical datasets. The data includes clinical and lifestyle attributes such as:
+- Age, sex, chest pain type (cp)
+- Resting blood pressure (trestbps), serum cholesterol (chol)
+- Fasting blood sugar (fbs), resting ECG (restecg)
+- Max heart rate (thalach), exercise-induced angina (exang)
+- ST depression (oldpeak), slope, ca, thal
+
+The repository includes `heart.csv` for experiments.
+
+## Methods
+- Data cleaning and duplicate removal
+- Normalization and scaling (StandardScaler, MinMaxScaler)
+- Statistical tests (chi-square, ANOVA, F-test)
+- PCA and feature selection
+- SMOTE for class balancing
+- Stratified k-fold cross validation
+
+## Results (from the report)
+SALKS achieved 87.02% accuracy, outperforming:
+- ANN: 81.97%
+- XRSS (XGBoost Random Classifier with Stratified K-Fold SMOTE): 81.30%
+- KNN: 77.05%
+
+## Repository Contents
+- Notebooks: `proj_2_ANN.ipynb`, `proj_2_KNN.ipynb`, `Proj_2_XGB_RC.ipynb`, `Proj_2_CB.ipynb`
+- Python scripts: `proj_2_ann.py`, `proj_2_knn.py`, `proj_2_own.py`, `proj_2_xgb_rc.py`
+- Dataset: `heart.csv`
+
+## How to Run
+### Option 1: Notebooks (recommended)
+1. Open a notebook in Jupyter or Google Colab.
+2. Make sure `heart.csv` is in the same directory.
+3. Run the cells top to bottom.
+
+### Option 2: Python scripts
+The `.py` files are exported from Colab and include notebook-style commands (for example `! pip install`). For best results, run them in Google Colab, or clean them for local execution.
+
+## Report Source
+This README is derived from the project report: `Kavin Proj Report Final.pdf`.
