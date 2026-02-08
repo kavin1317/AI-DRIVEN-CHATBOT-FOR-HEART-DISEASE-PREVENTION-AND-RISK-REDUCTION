@@ -198,6 +198,9 @@ def main() -> None:
         layout="centered",
     )
 
+    # Ensure model directory exists for saved artifacts
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
     st.title("🫀 AI-Driven Heart Disease Chatbot (SALKS)")
     st.write(
         "This chatbot uses the **SALKS ensemble** (ANN + KNN + Logistic Regression with SMOTE) "
@@ -209,6 +212,8 @@ def main() -> None:
         st.header("⚙️ Configuration")
         fast_mode = st.checkbox("⚡ Fast training mode (recommended)", value=True)
         st.caption("Fast mode: 12 epochs, smaller network. Full mode: 40 epochs, larger network.")
+        st.caption("Models are saved locally in `models/` and reused on next run.")
+        retrain = st.button("🔁 Train/Update Models")
         
         st.divider()
         st.header("📝 Input Details")
@@ -256,6 +261,15 @@ def main() -> None:
         
         st.divider()
         run = st.button("🔍 Assess Risk", type="primary", use_container_width=True)
+
+    if retrain:
+        st.warning("⚠️ Training models (this happens once and will be reused).")
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        train_and_save_models(fast_mode, progress_bar, status_text)
+        st.success("✅ Models trained and saved. Re-run assessment.")
+        get_models.clear()
+        return
 
     if not run:
         st.info("👈 Fill in your health details in the sidebar and click '🔍 Assess Risk' to begin.")
