@@ -6,44 +6,103 @@ import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
-from sklearn.ensemble import RandomForestClassifier
+from imblearn.over_sampling import SMOTE
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
+import tensorflow as tf
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 
 APP_DIR = Path(__file__).resolve().parent
 DATA_PATH = APP_DIR / "data" / "heart.csv"
 MODEL_DIR = APP_DIR / "models"
-MODEL_PATH = MODEL_DIR / "heart_disease_model.pkl"
+
+ANN_PATH = MODEL_DIR / "salks_ann.h5"
+KNN_PATH = MODEL_DIR / "salks_knn.pkl"
+META_PATH = MODEL_DIR / "salks_meta.pkl"
+SCALER_PATH = MODEL_DIR / "salks_scaler.pkl"
 
 FEATURES = ["age", "sex", "trestbps", "chol", "cp", "thalach", "fbs", "restecg", "exang"]
+
+
+@st.cache_resource
+
+def get_models():
+    if not all(path.exists() for path in [ANN_PATH, KNN_PATH, META_PATH, SCALER_PATH]):
+        train_and_save_models()
+
+    ann_model = tf.keras.models.load_model(ANN_PATH)
+    knn_model = joblib.load(KNN_PATH)
+    meta_model = joblib.load(META_PATH)
+    scaler = joblib.load(SCALER_PATH)
+    return ann_model, knn_model, meta_model, scaler
 
 
 def load_data() -> tuple[pd.DataFrame, pd.Series]:
     if not DATA_PATH.exists():
         raise FileNotFoundError(f"Missing dataset at {DATA_PATH}")
     df = pd.read_csv(DATA_PATH)
+    df = df.drop_duplicates()
     X = df[FEATURES]
     y = df["target"]
     return X, y
 
 
-def train_model(X: pd.DataFrame, y: pd.Series) -> RandomForestClassifier:
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+def build_ann(input_dim: int) -> tf.keras.Model:
+    model = Sequential(
+        [
+            Dense(128, activation="relu", input_shape=(input_dim,)),
+            BatchNormalization(),
+            Dropout(0.3),
+            Dense(64, activation="relu"),
+            BatchNormalization(),
+            Dropout(0.2),
+            Dense(1, activation="sigmoid"),
+        ]
     )
-    model.fit(X_train, y_train)
-    MODEL_DIR.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, MODEL_PATH)
+    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
     return model
 
 
-@st.cache_resource
-
-def get_or_train_model() -> RandomForestClassifier:
-    if MODEL_PATH.exists():
-        return joblib.load(MODEL_PATH)
+def train_and_save_models() -> None:
     X, y = load_data()
-    return train_model(X, y)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    smote = SMOTE(random_state=42)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_resampled)
+    X_test_scaled = scaler.transform(X_test)
+
+    ann_model = build_ann(X_train_scaled.shape[1])
+    ann_model.fit(
+        X_train_scaled,
+        y_train_resampled,
+        epochs=40,
+        batch_size=16,
+        verbose=0,
+    )
+
+    knn_model = KNeighborsClassifier(n_neighbors=7, weights="distance", metric="manhattan")
+    knn_model.fit(X_train_scaled, y_train_resampled)
+
+    ann_probs = ann_model.predict(X_test_scaled, verbose=0).flatten()
+    knn_probs = knn_model.predict_proba(X_test_scaled)[:, 1]
+    meta_features = np.column_stack((ann_probs, knn_probs))
+    meta_model = LogisticRegressionCV(cv=5, max_iter=1000)
+    meta_model.fit(meta_features, y_test)
+
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    ann_model.save(ANN_PATH, include_optimizer=False)
+    joblib.dump(knn_model, KNN_PATH)
+    joblib.dump(meta_model, META_PATH)
+    joblib.dump(scaler, SCALER_PATH)
 
 
 def categorize_blood_pressure(bp: int) -> str:
@@ -62,21 +121,25 @@ def categorize_cholesterol(chol: int) -> str:
     return "High"
 
 
-def predict_risk(model: RandomForestClassifier, features: np.ndarray) -> int:
-    return int(model.predict(features)[0])
+def predict_risk(ann_model, knn_model, meta_model, scaler, features: np.ndarray) -> int:
+    scaled = scaler.transform(features)
+    ann_prob = ann_model.predict(scaled, verbose=0).flatten()
+    knn_prob = knn_model.predict_proba(scaled)[:, 1]
+    meta_features = np.column_stack((ann_prob, knn_prob))
+    return int(meta_model.predict(meta_features)[0])
 
 
 def main() -> None:
     st.set_page_config(
-        page_title="Heart Disease Risk Chatbot",
+        page_title="Heart Disease Risk Chatbot (SALKS)",
         page_icon="🫀",
         layout="centered",
     )
 
     st.title("AI-Driven Heart Disease Risk Assessment")
     st.write(
-        "Enter your health details to estimate risk and get lifestyle recommendations. "
-        "This tool is for educational use and not a medical diagnosis."
+        "This Streamlit UI uses the SALKS ensemble (ANN + KNN + Logistic Regression with SMOTE). "
+        "It is for educational use only and not a medical diagnosis."
     )
 
     with st.sidebar:
@@ -115,14 +178,13 @@ def main() -> None:
         exang = st.selectbox(
             "Exercise-Induced Angina", options=[("No", 0), ("Yes", 1)], format_func=lambda x: x[0]
         )[1]
-
         run = st.button("Assess Risk")
 
     if not run:
         st.info("Fill in the inputs and click 'Assess Risk'.")
         return
 
-    model = get_or_train_model()
+    ann_model, knn_model, meta_model, scaler = get_models()
     features = np.array([[age, sex, trestbps, chol, cp, thalach, fbs, restecg, exang]])
 
     bp_category = categorize_blood_pressure(int(trestbps))
@@ -132,7 +194,7 @@ def main() -> None:
     if manual_high_risk:
         risk_label = "High"
     else:
-        prediction = predict_risk(model, features)
+        prediction = predict_risk(ann_model, knn_model, meta_model, scaler, features)
         risk_label = "High" if prediction == 1 else "No Risk, Healthy"
 
     st.subheader("Health Analysis")

@@ -23,14 +23,6 @@ The report states the dataset was sourced from public medical repositories, prim
 
 The repository includes `data/heart.csv` for experiments.
 
-## Methods
-- Data cleaning and duplicate removal
-- Normalization and scaling (StandardScaler, MinMaxScaler)
-- Statistical tests (chi-square, ANOVA, F-test)
-- PCA and feature selection
-- SMOTE for class balancing
-- Stratified k-fold cross validation
-
 ## Results (from the report)
 SALKS achieved 87.02% accuracy, outperforming:
 - ANN: 81.97%
@@ -40,6 +32,7 @@ SALKS achieved 87.02% accuracy, outperforming:
 ## Notebooks
 - `Notebooks/Proj_2_CB.ipynb`
 - `Notebooks/Proj_2_SALKS.ipynb`
+- `Notebooks/Proj_2_SALKS_Chatbot.ipynb`
 - `Notebooks/Proj_2_XGB_RC.ipynb`
 - `Notebooks/proj_2_ANN.ipynb`
 - `Notebooks/proj_2_KNN.ipynb`
@@ -55,18 +48,13 @@ SALKS achieved 87.02% accuracy, outperforming:
 - Report: `reports/Kavin Proj Report Final.pdf`
 - Streamlit UI: `streamlit_app.py`
 
-## Streamlit UI
+## Streamlit UI (SALKS)
 Run the web interface locally:
 
 ```bash
 pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
-
-## How to Run Notebooks
-1. Open a notebook in Jupyter or Google Colab.
-2. Make sure `data/heart.csv` is available (adjust paths if needed).
-3. Run the cells top to bottom.
 
 ## Report Source
 This README is derived from the project report: `reports/Kavin Proj Report Final.pdf`.
