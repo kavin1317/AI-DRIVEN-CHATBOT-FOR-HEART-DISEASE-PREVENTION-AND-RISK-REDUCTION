@@ -7,12 +7,13 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from imblearn.over_sampling import SMOTE
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 from tensorflow.keras import Sequential
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 
 APP_DIR = Path(__file__).resolve().parent
@@ -25,13 +26,20 @@ META_PATH = MODEL_DIR / "salks_meta.pkl"
 SCALER_PATH = MODEL_DIR / "salks_scaler.pkl"
 
 FEATURES = ["age", "sex", "trestbps", "chol", "cp", "thalach", "fbs", "restecg", "exang"]
+FAST_EPOCHS = 12
+FULL_EPOCHS = 40
+FAST_BATCH = 32
+FULL_BATCH = 16
+
+
+def models_exist() -> bool:
+    return all(path.exists() for path in [ANN_PATH, KNN_PATH, META_PATH, SCALER_PATH])
 
 
 @st.cache_resource
-
-def get_models():
-    if not all(path.exists() for path in [ANN_PATH, KNN_PATH, META_PATH, SCALER_PATH]):
-        train_and_save_models()
+def get_models(fast_mode: bool):
+    if not models_exist():
+        train_and_save_models(fast_mode=fast_mode)
 
     ann_model = tf.keras.models.load_model(ANN_PATH)
     knn_model = joblib.load(KNN_PATH)
@@ -50,13 +58,14 @@ def load_data() -> tuple[pd.DataFrame, pd.Series]:
     return X, y
 
 
-def build_ann(input_dim: int) -> tf.keras.Model:
+def build_ann(input_dim: int, fast_mode: bool) -> tf.keras.Model:
+    hidden_units = (64, 32) if fast_mode else (128, 64)
     model = Sequential(
         [
-            Dense(128, activation="relu", input_shape=(input_dim,)),
+            Dense(hidden_units[0], activation="relu", input_shape=(input_dim,)),
             BatchNormalization(),
             Dropout(0.3),
-            Dense(64, activation="relu"),
+            Dense(hidden_units[1], activation="relu"),
             BatchNormalization(),
             Dropout(0.2),
             Dense(1, activation="sigmoid"),
@@ -66,7 +75,7 @@ def build_ann(input_dim: int) -> tf.keras.Model:
     return model
 
 
-def train_and_save_models() -> None:
+def train_and_save_models(fast_mode: bool) -> None:
     X, y = load_data()
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -80,13 +89,17 @@ def train_and_save_models() -> None:
     X_train_scaled = scaler.fit_transform(X_train_resampled)
     X_test_scaled = scaler.transform(X_test)
 
-    ann_model = build_ann(X_train_scaled.shape[1])
+    ann_model = build_ann(X_train_scaled.shape[1], fast_mode=fast_mode)
+    epochs = FAST_EPOCHS if fast_mode else FULL_EPOCHS
+    batch_size = FAST_BATCH if fast_mode else FULL_BATCH
+    callbacks = [EarlyStopping(monitor="loss", patience=3, restore_best_weights=True)]
     ann_model.fit(
         X_train_scaled,
         y_train_resampled,
-        epochs=40,
-        batch_size=16,
+        epochs=epochs,
+        batch_size=batch_size,
         verbose=0,
+        callbacks=callbacks,
     )
 
     knn_model = KNeighborsClassifier(n_neighbors=7, weights="distance", metric="manhattan")
@@ -95,7 +108,7 @@ def train_and_save_models() -> None:
     ann_probs = ann_model.predict(X_test_scaled, verbose=0).flatten()
     knn_probs = knn_model.predict_proba(X_test_scaled)[:, 1]
     meta_features = np.column_stack((ann_probs, knn_probs))
-    meta_model = LogisticRegressionCV(cv=5, max_iter=1000)
+    meta_model = LogisticRegression(max_iter=300)
     meta_model.fit(meta_features, y_test)
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -184,7 +197,9 @@ def main() -> None:
         st.info("Fill in the inputs and click 'Assess Risk'.")
         return
 
-    ann_model, knn_model, meta_model, scaler = get_models()
+    fast_mode = st.sidebar.checkbox("Fast training (recommended)", value=True)
+
+    ann_model, knn_model, meta_model, scaler = get_models(fast_mode=fast_mode)
     features = np.array([[age, sex, trestbps, chol, cp, thalach, fbs, restecg, exang]])
 
     bp_category = categorize_blood_pressure(int(trestbps))
