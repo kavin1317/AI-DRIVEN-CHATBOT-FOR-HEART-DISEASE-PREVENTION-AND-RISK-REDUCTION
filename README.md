@@ -50,7 +50,7 @@ SALKS achieved 87.02% accuracy, outperforming:
 ## Chatbot UI
 The chatbot UI collects user health inputs (age, blood pressure, cholesterol, chest pain type, and related vitals), applies the SALKS ensemble model, and returns a risk classification with personalized health tips.
 
-When running locally, open the chatbot using the 'Proj_2_SALKS_Chatbot.ipynb' file
+When running locally, open the chatbot using the 'Notebooks/Proj_2_SALKS_Chatbot.ipynb' file
 
 ## Report Source
 This README is derived from the project report: `reports/Kavin Proj Report Final.pdf`.
