@@ -48,6 +48,12 @@ SALKS achieved 87.02% accuracy, outperforming:
 - Report: `reports/Kavin Proj Report Final.pdf`
 - Streamlit UI: `streamlit_app.py`
 
+## Chatbot UI
+The Streamlit chatbot UI collects user health inputs (age, blood pressure, cholesterol, chest pain type, and related vitals), applies the SALKS ensemble model, and returns a risk classification with personalized health tips.
+
+When running locally, open the chatbot at:
+- [http://localhost:8501](http://localhost:8501)
+
 ## Streamlit UI (SALKS)
 Run the web interface locally:
 
