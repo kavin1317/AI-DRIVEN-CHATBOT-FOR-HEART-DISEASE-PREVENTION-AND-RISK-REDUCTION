@@ -58,9 +58,13 @@ When running locally, open the chatbot at:
 Run the web interface locally:
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
+
+If the app feels slow on first run, keep the “Fast training” option enabled in the sidebar. This reduces model training time and speeds up startup.
 
 ## Report Source
 This README is derived from the project report: `reports/Kavin Proj Report Final.pdf`.
