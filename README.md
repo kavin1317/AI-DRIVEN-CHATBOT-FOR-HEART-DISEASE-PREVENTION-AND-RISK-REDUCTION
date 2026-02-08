@@ -30,7 +30,6 @@ SALKS achieved 87.02% accuracy, outperforming:
 - KNN: 77.05%
 
 ## Notebooks
-- `Notebooks/Proj_2_CB.ipynb`
 - `Notebooks/Proj_2_SALKS.ipynb`
 - `Notebooks/Proj_2_SALKS_Chatbot.ipynb`
 - `Notebooks/Proj_2_XGB_RC.ipynb`
